@@ -4,6 +4,7 @@ from aiogram.dispatcher import FSMContext
 from loader import dp
 from states import new_event
 
+from utils.db_api import quick_commands as commands
 @dp.message_handler(Command('new_event')) #/new_event
 async def new_event_(message: types.Message):
     await message.answer('Привет, ты начал регистрацию нового мероприятия.\nНапиши ID клуба:')
@@ -81,3 +82,18 @@ async def state1(message: types.Message, state: FSMContext):
                          f'Время: {TIME}\n'
                          f'Место: {Place}\n')
     await state.finish()
+    await commands.add_event(
+                            nullified='no',
+                            succeed='no',
+                            date_event=Date,
+                            time_event=TIME,
+                            place=Place,
+                            id_clab=int(ID_clab),
+                            name_event=Name_event,
+                            description_event=Description_event,
+                            link_event=Link,
+                            user_id=message.from_user.id,
+                            first_name=message.from_user.first_name,
+                            last_name=message.from_user.last_name,
+                            username=message.from_user.username)
+    await message.answer('Мероприятие успешно добавлено в БД')
