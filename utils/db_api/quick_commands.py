@@ -37,3 +37,5 @@ async def add_event(nullified: str, succeed: str, date_event: str, time_event: s
 async def select_all_events():
     events = await Event.query.gino.all()
     return events
+
+#
