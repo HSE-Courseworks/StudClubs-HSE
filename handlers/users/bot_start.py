@@ -38,3 +38,14 @@ async def profile(message: types.Message):
                          f'last_name - {user.last_name}\n'
                          f'username - {user.username}\n'
                          f'status - {user.status}')
+
+@dp.message_handler(text='/prevent')
+async def prevent(message: types.Message):
+    event = await commands.select_event(123)
+    await message.answer(f'IDклуба: {event.id_clab}\n'
+                         f'Название: {event.name_event}\n'
+                         f'Описание: {event.description_event}\n'
+                         f'Ссылка на регистрацию: {event.link_event}\n'
+                         f'Дата: {event.date_event}\n'
+                         f'Время: {event.time_event}\n'
+                         f'Место: {event.place}\n')
