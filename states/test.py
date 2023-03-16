@@ -8,7 +8,7 @@ class new_event(StatesGroup):
     date_event = State()
     time_event = State()
     place_event = State()
-    answer_q = State()
+    answer_question = State()
     update_name = State()
     update_description = State()
     update_link = State()
@@ -18,7 +18,7 @@ class new_event(StatesGroup):
 
 class rename_event(StatesGroup):
     edit_name = State()
-    e_answer_q = State()
+    edit_answer_question = State()
     edit_description = State()
     edit_link = State()
     edit_date = State()
