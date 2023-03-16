@@ -33,17 +33,17 @@ async def state1(message: types.Message, state: FSMContext):
                          f'Время: {event.time_event}\n'
                          f'Место: {event.place}\n')
     await message.answer('Всё верно?\n Ответить: да/нет')
-    await rename_event.e_answer_q.set()
+    await rename_event.edit_answer_question.set()
 
-@dp.message_handler(state=rename_event.e_answer_q)
+@dp.message_handler(state=rename_event.edit_answer_question)
 async def state1(message: types.Message, state: FSMContext):
     answer = message.text
-    await state.update_data(e_answer_q=answer)
+    await state.update_data(edit_answer_question=answer)
     data = await state.get_data()
-    if data.get('e_answer_q').lower() == 'да':
+    if data.get('edit_answer_question').lower() == 'да':
         await message.answer('Мероприятие успешно добавлено в БД')
         await state.finish()
-    elif data.get('e_answer_q').lower() == 'нет':
+    elif data.get('edit_answer_question').lower() == 'нет':
         await state.finish()
         await message.answer('что бы вы хотели изменить?', reply_markup=ikb_menu)
 
@@ -71,7 +71,7 @@ async def state1(message: types.Message, state: FSMContext):
                          f'Время: {event.time_event}\n'
                          f'Место: {event.place}\n')
     await message.answer('Всё верно?\n Ответить: да/нет')
-    await rename_event.e_answer_q.set()
+    await rename_event.edit_answer_question.set()
 @dp.callback_query_handler(text='ссылка')
 async def send_message(call: CallbackQuery):
     await call.message.answer('Введите новую ссылку')
@@ -94,7 +94,7 @@ async def state1(message: types.Message, state: FSMContext):
                          f'Время: {event.time_event}\n'
                          f'Место: {event.place}\n')
     await message.answer('Всё верно?\n Ответить: да/нет')
-    await rename_event.e_answer_q.set()
+    await rename_event.edit_answer_question.set()
 
 @dp.callback_query_handler(text='дата')
 async def send_message(call: CallbackQuery):
@@ -118,7 +118,7 @@ async def state1(message: types.Message, state: FSMContext):
                          f'Время: {event.time_event}\n'
                          f'Место: {event.place}\n')
     await message.answer('Всё верно?\n Ответить: да/нет')
-    await rename_event.e_answer_q.set()
+    await rename_event.edit_answer_question.set()
 @dp.callback_query_handler(text='время')
 async def send_message(call: CallbackQuery):
     await call.message.answer('Введите новое время')
@@ -141,7 +141,7 @@ async def state1(message: types.Message, state: FSMContext):
                          f'Время: {event.time_event}\n'
                          f'Место: {event.place}\n')
     await message.answer('Всё верно?\n Ответить: да/нет')
-    await rename_event.e_answer_q.set()
+    await rename_event.edit_answer_question.set()
 
 @dp.callback_query_handler(text='место')
 async def send_message(call: CallbackQuery):
@@ -165,4 +165,4 @@ async def state1(message: types.Message, state: FSMContext):
                          f'Время: {event.time_event}\n'
                          f'Место: {event.place}\n')
     await message.answer('Всё верно?\n Ответить: да/нет')
-    await rename_event.e_answer_q.set()
+    await rename_event.edit_answer_question.set()
