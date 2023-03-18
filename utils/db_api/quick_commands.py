@@ -34,6 +34,33 @@ async def add_event(nullified: str, succeed: str, date_event: str, time_event: s
     except UniqueViolationError:
         print('Мероприятие не добавлено')
 
-async def select_all_events():
-    events = await Event.query.gino.all()
-    return events
+async def select_event(id_event):
+    event = await Event.query.where(Event.id_event == id_event).gino.first()
+    return event
+
+async def count_events():
+    count = await db.func.count(Event.event_id).gino.scalar()
+    return count
+async def update_name_event(id_event, new_name):
+    event = await select_event(id_event)
+    await event.update(name_event=new_name).apply()
+
+async def update_description_event(id_event, new_description):
+    event = await select_event(id_event)
+    await event.update(description_event=new_description).apply()
+
+async def update_link_event(id_event, new_link):
+    event = await select_event(id_event)
+    await event.update(link_event=new_link).apply()
+
+async def update_date_event(id_event, new_date):
+    event = await select_event(id_event)
+    await event.update(date_event=new_date).apply()
+
+async def update_time_event(id_event, new_time):
+    event = await select_event(id_event)
+    await event.update(time_event=new_time).apply()
+
+async def update_place_event(id_event, new_place):
+    event = await select_event(id_event)
+    await event.update(place=new_place).apply()

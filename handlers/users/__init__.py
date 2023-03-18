@@ -2,5 +2,6 @@
 from .bot_start import dp
 from .help import dp
 from .register_event import dp
+from .edit_event import dp
 
 __all__ = ['dp'] #список параметров которые можно импортировать с папки
