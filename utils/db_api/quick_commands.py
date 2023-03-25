@@ -3,6 +3,9 @@ from asyncpg import UniqueViolationError
 from utils.db_api.db_gino import db
 from utils.db_api.schemas.user import User
 from utils.db_api.schemas.user import Event
+from utils.db_api.schemas.user import Admins
+from utils.db_api.schemas.user import Clubs
+from datetime import datetime
 
 async def add_user(user_id: int, first_name: str, last_name: str, username: str, status: str ):
     try:
@@ -27,15 +30,17 @@ async def update_status(user_id, status):
     user = await select_user(user_id)
     await user.update(status=status).apply()
 
-async def add_event(nullified: str, succeed: str, date_event: str, time_event: str, place: str, id_clab: int, name_event: str, description_event: str, link_event: str, user_id: int, first_name: str, last_name: str, username: str ):
+
+
+async def add_event(nullified: str, succeed: str, date_time_event: datetime, date_event: str, time_event: str, place: str, id_clab: int, name_event: str, description_event: str, link_event: str, user_id: int, first_name: str, last_name: str, username: str ):
     try:
-        event = Event(nullified=nullified,succeed=succeed, date_event=date_event, time_event=time_event, place=place, id_clab=id_clab, name_event=name_event, description_event=description_event, link_event=link_event, user_id=user_id, first_name=first_name, last_name=last_name, username=username )
+        event = Event(nullified=nullified,succeed=succeed, date_time_event=date_time_event, date_event=date_event, time_event=time_event, place=place, id_clab=id_clab, name_event=name_event, description_event=description_event, link_event=link_event, user_id=user_id, first_name=first_name, last_name=last_name, username=username )
         await event.create()#создаём запись мероприятия в таблице
     except UniqueViolationError:
         print('Мероприятие не добавлено')
 
 async def select_event(id_event):
-    event = await Event.query.where(Event.id_event == id_event).gino.first()
+    event = await Event.query.where(Event.event_id == id_event).gino.first()
     return event
 
 async def count_events():
@@ -64,3 +69,46 @@ async def update_time_event(id_event, new_time):
 async def update_place_event(id_event, new_place):
     event = await select_event(id_event)
     await event.update(place=new_place).apply()
+
+
+async def add_admin(admin_id: int, first_name: str, last_name: str, username: str, FIO: str, vk_link: str, position: str, club_id: int):
+    try:
+        admin = Admins(admin_id=admin_id, first_name=first_name, last_name=last_name, username=username, FIO=FIO, vk_link=vk_link, position=position, club_id=club_id)
+        await admin.create()
+    except UniqueViolationError:
+        print('Администратор не добавлен')
+
+async def new_club(club_name: str):
+    try:
+        club = Clubs(club_name=club_name)
+        await club.create()
+    except UniqueViolationError:
+        print('Клуб не добавлен')
+
+
+async def select_admin_position(admin_id):
+    position = await Admins.select('position').where(Admins.admin_id == admin_id).gino.scalar()
+    return position
+
+async def select_curator_idclub(admin_id):
+    idclub = await Admins.select('club_id').where(Admins.admin_id == admin_id).gino.scalar()
+    return idclub
+
+async def select_org_id():
+    admin_id = await Admins.select('admin_id').where(Admins.position == 'org').gino.scalar()
+    return admin_id
+
+async def select_all_clubs():
+    clubs = await Clubs.query.order_by(Clubs.id_club).gino.all()
+    return clubs
+
+async def select_club(id_club):
+    club = await Clubs.query.where(Clubs.id_club == id_club).gino.first()
+    return club
+
+async def update_name_club(id_club, new_name):
+    club = await select_club(id_club)
+    await club.update(club_name=new_name).apply()
+
+async def delete_club(id_club):
+    await Clubs.delete.where(Clubs.id_club == id_club).gino.status()

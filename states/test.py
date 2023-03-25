@@ -24,3 +24,29 @@ class rename_event(StatesGroup):
     edit_date = State()
     edit_time = State()
     edit_place = State()
+
+class name_club(StatesGroup):
+    club_name = State()
+    edit_club_name = State()
+    ID_edit_club_name = State()
+    ID_club_delete = State()
+
+class reg_admin(StatesGroup):
+    admin_id = State()
+    first_name = State()
+    last_name = State()
+    username = State()
+    fio_admin = State()
+    vk_link_admin = State()
+    ID_club_admin = State()
+    admin_position = State()
+    answer_question_admin = State()
+    update_fio_admin = State()
+    update_vk_link_admin = State()
+    update_ID_club_admin = State()
+    add_admin = State()
+
+class reg_yes_no_admin(StatesGroup):
+    add_admin = State()
+    not_add_admin = State()
+
