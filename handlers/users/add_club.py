@@ -8,9 +8,6 @@ from utils.db_api import quick_commands as commands
 @dp.message_handler(Command('add_club'))
 async def new_admin_(message: types.Message):
     admin_id = message.from_user.id
-    print(await commands.select_admin_position(admin_id))
-    naila = 904046559
-    print(await commands.select_admin_position(naila))
     if(await commands.select_admin_position(admin_id) == 'org'): #проверка на организатора
         await message.answer('Привет, ты начал регистрацию нового клуба.\n Введи название клуба:')
         await name_club.club_name.set()
@@ -20,7 +17,6 @@ async def new_admin_(message: types.Message):
 @dp.message_handler(state=name_club.club_name)
 async def state1(message: types.Message, state: FSMContext):
     answer = message.text
-
     await state.update_data(club_name=answer)
     data = await state.get_data()
     await commands.new_club(data.get('club_name'))

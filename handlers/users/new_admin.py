@@ -10,32 +10,12 @@ from keyboards.inline import rechoice_admin_position
 from loader import bot
 from keyboards.inline import yes_no_new_admin
 from keyboards.inline import edit_regisration_admin
+from data.config import admins
 
 from utils.db_api import quick_commands as commands
 
 flag = True
-info = []
-"""
-await commands.add_admin(admin_id=message.from_user.id,
-                             first_name=message.from_user.first_name,
-                             last_name=message.from_user.last_name,
-                             username=message.from_user.username,
-                             position='adm',
-                             club_id=0 #0 значит что может редачть мероприятия всех клубов
-                             )
-"""
-@dp.message_handler(Command('serafim_admin'))
-async def new_admin_(message: types.Message):
-    if message.from_user.id == 710349061:
-        await commands.add_admin(admin_id=message.from_user.id,
-                                 first_name=message.from_user.first_name,
-                                 last_name=message.from_user.last_name,
-                                 username=message.from_user.username,
-                                 FIO='Кравчук Серафим Павлович',
-                                 vk_link='https://vk.com/batkovich001',
-                                 position='org',
-                                 club_id=0)
-        await message.answer('Это успех')
+info = {}
 
 @dp.message_handler(Command('new_admin'))
 async def new_admin_(message: types.Message):
@@ -59,7 +39,13 @@ async def state1(message: types.Message, state: FSMContext):
     if answer[0:15] == 'https://vk.com/':
         await state.update_data(vk_link_admin=answer)
         await state.reset_state(with_data=False)
-        await message.answer('Выберите кем вы хотите быть:', reply_markup=choice_admin_position)
+        if message.from_user.id in admins:
+            await state.update_data(admin_position='org')
+            await state.update_data(ID_club_admin=0)
+            await question_new_admin(message, state)
+            await reg_admin.answer_question_admin.set()
+        else:
+            await message.answer('Выберите кем вы хотите быть:', reply_markup=choice_admin_position)
     else:
         await message.answer('ОШИБКА: не корректная ссылка')
         await message.answer('Напиши cсылку на свой профиль в ВК ещё раз:')
@@ -71,7 +57,7 @@ async def state1(message: types.Message, state: FSMContext):
 async def send_message(call: CallbackQuery, state: FSMContext):
     await call.message.answer('Ты выбрал позицию администратора')
     await state.update_data(admin_position='admin')
-    await state.update_data(ID_club_admin=0)
+    await state.update_data(ID_club_admin=0)#0-значит может редачить все клубы
     await question_new_admin(call.message, state)
     await reg_admin.answer_question_admin.set()
 
@@ -122,6 +108,8 @@ async def question_new_admin(message, state):
         position = 'администратор'
     elif data.get('admin_position') == 'curator':
         position = 'куратор клуба'
+    elif data.get('admin_position') == 'org':
+        position = 'org'
     await message.answer(f'Регистрация успешно завершена\n'
                          f'ФИО: {FIO} \n'
                          f'Ссылка на ВК: {link}\n'
@@ -141,15 +129,15 @@ async def state1(message: types.Message, state: FSMContext):
             await message.answer('Пожалуйста попробуйте подать заявку чуть-чуть позднее, в настоящее время нельзя подать заявку на рассмотрение')
         elif flag == True:
             global info
-            info.append(data.get('admin_id'))
-            info.append(data.get('first_name'))
-            info.append(data.get('last_name'))
-            info.append(data.get('username'))
-            info.append(data.get('fio_admin'))
-            info.append(data.get('vk_link_admin'))
-            info.append(data.get('admin_position'))
-            info.append(data.get('ID_club_admin'))
-
+            info.fromkeys(['ID', 'FirstName', 'LastName', 'Username', 'fio', 'VK_link', 'Position', 'ClubID'])
+            info["ID"] = data.get('admin_id')
+            info["FirstName"] = data.get('first_name')
+            info["LastName"] = data.get('last_name')
+            info["Username"] = data.get('username')
+            info["fio"] = data.get('fio_admin')
+            info["VK_link"] = data.get('vk_link_admin')
+            info["Position"] = data.get('admin_position')
+            info["ClubID"] = data.get('ID_club_admin')
             admin_id = data.get('admin_id')
             first_name = data.get('first_name')
             last_name = data.get('last_name')
@@ -167,22 +155,33 @@ async def state1(message: types.Message, state: FSMContext):
                 position = 'администратор'
             elif data.get('admin_position') == 'curator':
                 position = 'куратор клуба'
-            org_id = await commands.select_org_id()
-            flag = False
-            answer_to_org = (f'Пользователь:\n'
-                             f'ID: {admin_id}\n'
-                             f'First name: {first_name}\n'
-                             f'Last name: {last_name}\n'
-                             f'Username: {username}\n'
-                             f'Хочет стать администратором или куратором клуба.\nВот данные которые ввёл пользователь:\n'
-                             f'ФИО: {FIO}\n'
-                             f'Ссылка на ВК: {link}\n'
-                             f'Хочет быть на позиции: {position}\n'
-                             f'Хочет курировать клуб: {club_name}\n\n'
-                             f'Добавить пользователя?\n\n')
-            await bot.send_message(org_id, answer_to_org, reply_markup=yes_no_new_admin)
-            await message.answer('Ваша заявка передана на рассмотрение.\nЯ оповещу вас о результатах, как только так сразу :)')
-            await state.finish()
+            if data.get('admin_position') != 'org':
+                org_id = await commands.select_org_id()
+                flag = False
+                answer_to_org = (f'Пользователь:\n'
+                                 f'ID: {admin_id}\n'
+                                 f'First name: {first_name}\n'
+                                 f'Last name: {last_name}\n'
+                                 f'Username: {username}\n'
+                                 f'Хочет стать администратором или куратором клуба.\nВот данные которые ввёл пользователь:\n'
+                                 f'ФИО: {FIO}\n'
+                                 f'Ссылка на ВК: {link}\n'
+                                 f'Хочет быть на позиции: {position}\n'
+                                 f'Хочет курировать клуб: {club_name}\n\n'
+                                 f'Добавить пользователя?\n\n')
+                await bot.send_message(org_id, answer_to_org, reply_markup=yes_no_new_admin)
+                await message.answer('Ваша заявка передана на рассмотрение.\nЯ оповещу вас о результатах, как только так сразу :)')
+                await state.finish()
+            else:
+                await commands.add_admin(admin_id=info["ID"],
+                                         first_name=info["FirstName"],
+                                         last_name=info["LastName"],
+                                         username=info["Username"],
+                                         FIO=info["fio"],
+                                         vk_link=info["VK_link"],
+                                         position=info["Position"],
+                                         club_id=info["ClubID"])
+                await message.answer('успешно дабаваил тебя в орг')
     elif data.get('answer_question_admin').lower() == 'нет':
         await state.reset_state(with_data=False)
         await message.answer('что бы вы хотели изменить?', reply_markup=edit_regisration_admin)
@@ -279,15 +278,15 @@ async def send_message(call: CallbackQuery, state: FSMContext):
 async def send_message(call: CallbackQuery):
     await call.message.answer(f'Пользователь успешно добавлен в админку')
     global info
-    await commands.add_admin(admin_id=info[0],
-                             first_name=info[1],
-                             last_name=info[2],
-                             username=info[3],
-                             FIO=info[4],
-                             vk_link=info[5],
-                             position=info[6],
-                             club_id=info[7])
-    await bot.send_message(info[0], 'Ваша заявка на администратора или куратора клуба одобрена, вы успешно добавлены в базу данных')
+    await commands.add_admin(admin_id=info["ID"],
+                             first_name=info["FirstName"],
+                             last_name=info["LastName"],
+                             username=info["Username"],
+                             FIO=info["fio"],
+                             vk_link=info["VK_link"],
+                             position=info["Position"],
+                             club_id=info["ClubID"])
+    await bot.send_message(info["ID"], 'Ваша заявка на администратора или куратора клуба одобрена, вы успешно добавлены в базу данных')
     info.clear()
     global flag
     flag = True
@@ -301,7 +300,7 @@ async def state1(message: types.Message, state: FSMContext):
 async def send_message(call: CallbackQuery):
     await call.message.answer('Пользователь не добавлен в админку')
     global info
-    await bot.send_message(info[0], 'Ваша заявка на администратора или куратора клуба отклонена')
+    await bot.send_message(info["ID"], 'Ваша заявка на администратора или куратора клуба отклонена')
     info.clear()
     global flag
     flag = True
