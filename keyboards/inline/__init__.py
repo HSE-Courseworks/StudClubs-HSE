@@ -1,2 +1,6 @@
 from .inline_kb_menu import ikb_menu
 from .ikb_menu_firstt import ikb_menu_first
+from .choice_admin_position import choice_admin_position
+from .choice_admin_position import rechoice_admin_position
+from .yes_no_new_admin import yes_no_new_admin
+from .edit_regisration_admin import edit_regisration_admin
