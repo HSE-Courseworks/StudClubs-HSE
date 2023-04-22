@@ -20,7 +20,7 @@ def test_create_all():
 
 from utils.db_api import quick_commands as commands
 import aiomas #не используется тестом
-import asyncio #не используется тестом почему-то
+import asyncio # не используется тестом почему-то
 from gino import Gino #не используется тестом
 import gino #не используется тестом
 @pytest.mark.asyncio
